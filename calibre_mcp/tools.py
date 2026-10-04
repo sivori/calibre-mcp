@@ -66,7 +66,12 @@ def library_info(db):
 
 
 def search_books(db, query='', limit=25):
-    ids = db.search(query) if query else db.all_book_ids()
+    # allow_templates=False: calibre's template: search can run Python
+    # ("python:" templates), which would let any caller execute code.
+    try:
+        ids = db.search(query, allow_templates=False) if query else db.all_book_ids()
+    except Exception as e:
+        raise ToolError(f'Bad search {query!r}: {e}')
     ids = sorted(ids, key=lambda i: db.field_for('sort', i) or '')
     return {
         'total': len(ids),

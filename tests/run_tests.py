@@ -96,6 +96,17 @@ def test_tools(db, ids):
     r = tools.search_books(db, 'author:dickens')
     check('search_books by author', [b['id'] for b in r['books']] == [dickens], r)
     check('search_books empty query lists all', tools.search_books(db)['total'] == 3)
+    marker = os.path.join(tempfile.gettempdir(), 'calibre-mcp-template-probe')
+    if os.path.exists(marker):
+        os.remove(marker)
+    probe = ('template:"python:\ndef evaluate(book, context):\n'
+             f'    open({marker!r}, \'w\').write(\'ran\')\n'
+             '    return \'1\'#@#:t:1"')
+    try:
+        tools.search_books(db, probe)
+    except tools.ToolError:
+        pass
+    check('template searches cannot run code', not os.path.exists(marker))
     check('search_books respects limit', len(tools.search_books(db, limit=1)['books']) == 1)
 
     b = tools.get_book(db, dickens)
@@ -175,6 +186,8 @@ def test_http(db, ids):
 
         status, _ = rpc(url, 'ping', headers={'Origin': 'https://evil.example'})
         check('foreign Origin is rejected', status == 403, status)
+        status, _ = rpc(url, 'ping', headers={'Host': 'attacker.example:8395'})
+        check('foreign Host is rejected', status == 403, status)
         status, r = rpc(url, 'ping', headers={'Origin': 'http://localhost:3000'})
         check('localhost Origin is allowed', status == 200, status)
         status, _ = rpc(url, 'ping', headers={'MCP-Protocol-Version': '1999-01-01'})

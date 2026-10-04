@@ -70,8 +70,13 @@ support streamable HTTP servers take the same URL.
 ## Security
 
 - Binds to `127.0.0.1` only; it is not reachable from other machines.
-- Rejects requests whose `Origin` header isn't localhost, so a web page can't
-  reach it via DNS rebinding.
+- Rejects requests whose `Host` or `Origin` header isn't localhost, so a web
+  page can't reach it via DNS rebinding.
+- Calibre's `template:` searches are disabled in `search_books`. They can run
+  Python, which would let anyone who can send a query (including text that
+  talks a model into searching for it) run code inside calibre.
+- Book text, descriptions and annotations go to your MCP client as-is. Treat
+  them like any other untrusted content an assistant reads.
 - There is no authentication: any process on your machine can read the
   library while calibre runs. That is the same access those processes already
   have to the library folder.

@@ -15,8 +15,9 @@ from .tools import TOOLS, TOOLS_BY_NAME, ToolError
 
 ENDPOINT = '/mcp'
 SUPPORTED_VERSIONS = ('2025-11-25', '2025-06-18', '2025-03-26')
-SERVER_INFO = {'name': 'calibre-mcp', 'version': '0.1.0'}
+SERVER_INFO = {'name': 'calibre-mcp', 'version': '0.1.1'}
 LOCAL_HOSTS = {'localhost', '127.0.0.1', '[::1]', '::1'}
+MAX_BODY = 1 << 20  # requests are small JSON-RPC calls
 
 PARSE_ERROR = -32700
 INVALID_REQUEST = -32600
@@ -173,6 +174,12 @@ class _Handler(BaseHTTPRequestHandler):
         if urlparse(self.path).path.rstrip('/') != ENDPOINT:
             self._send(404, _error(None, INVALID_REQUEST, f'MCP endpoint is {ENDPOINT}'))
             return False
+        # DNS rebinding: a page on attacker.example resolved to 127.0.0.1
+        # arrives with that name in Host (and usually in Origin).
+        host = (self.headers.get('Host') or '').rsplit(':', 1)[0]
+        if host not in LOCAL_HOSTS:
+            self._send(403, _error(None, INVALID_REQUEST, 'Host not allowed'))
+            return False
         origin = self.headers.get('Origin')
         if origin and urlparse(origin).hostname not in LOCAL_HOSTS:
             self._send(403, _error(None, INVALID_REQUEST, 'Origin not allowed'))
@@ -194,9 +201,14 @@ class _Handler(BaseHTTPRequestHandler):
                     while self.rfile.readline() not in (b'\r\n', b'\n', b''):
                         pass  # trailers
                     return b''.join(chunks)
+                if sum(map(len, chunks)) + size > MAX_BODY:
+                    raise ValueError('body too large')
                 chunks.append(self.rfile.read(size))
                 self.rfile.readline()  # CRLF after each chunk
-        return self.rfile.read(int(self.headers.get('Content-Length') or 0))
+        length = int(self.headers.get('Content-Length') or 0)
+        if length > MAX_BODY:
+            raise ValueError('body too large')
+        return self.rfile.read(length)
 
     def do_POST(self):
         # Always drain the body first: answering early on a keep-alive

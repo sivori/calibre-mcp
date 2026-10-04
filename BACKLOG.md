@@ -12,4 +12,5 @@
 - [ ] Expose reading progress from the calibre viewer @idea
 
 ## Done
+- [x] 2026-10-04 v0.1.1: security pass. Disabled template: searches (python: templates gave code execution via search_books), Host-header check, 1 MB request cap
 - [x] 2026-10-04 v0.1.0: seven read-only tools, stdlib streamable HTTP server, tests on a throwaway library, verified with Claude Code
