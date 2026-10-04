@@ -129,19 +129,22 @@ def search_full_text(db, query, book_ids=None, limit=20, snippet_words=30):
         )
     except Exception as e:
         raise ToolError(f'Bad full-text query {query!r}: {e}')
-    titles = {}
-    results = []
-    for hit in hits[:limit]:
+    # calibre indexes each format separately, so the same book usually hits
+    # once per format with near-identical snippets. Keep one result per book.
+    by_book = {}
+    for hit in hits:
         bid = hit['book_id']
-        if bid not in titles:
-            titles[bid] = db.field_for('title', bid)
-        results.append({
+        if bid in by_book:
+            by_book[bid]['formats'].append(hit['format'])
+            continue
+        by_book[bid] = {
             'book_id': bid,
-            'title': titles[bid],
-            'format': hit['format'],
+            'title': db.field_for('title', bid),
+            'formats': [hit['format']],
             'snippet': hit.get('text'),
-        })
-    return {'total': len(hits), 'results': results}
+        }
+    results = list(by_book.values())
+    return {'total': len(results), 'results': results[:limit]}
 
 
 def get_passage(db, book_id, query, words=120):
@@ -156,7 +159,7 @@ def get_passage(db, book_id, query, words=120):
         'book_id': book_id,
         'title': hit['title'],
         'authors': list(db.field_for('authors', book_id)),
-        'format': hit['format'],
+        'formats': hit['formats'],
         'passage': hit['snippet'],
     }
 
@@ -251,7 +254,7 @@ TOOLS = [
         'description': (
             'Search inside the text of the books (calibre full-text search; '
             'SQLite FTS5 syntax: words, "exact phrases", AND/OR/NOT, prefix*). '
-            'Returns a highlighted snippet per matching book format.'
+            'Returns one highlighted snippet per matching book.'
         ),
         'fn': search_full_text,
         'inputSchema': {

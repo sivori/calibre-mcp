@@ -16,11 +16,15 @@ class MCPAction(InterfaceAction):
     def genesis(self):
         self.server = None
         # The server thread reads this; only the GUI thread replaces it.
-        self.db = self.gui.current_db.new_api
+        # The library isn't open yet during genesis().
+        self.db = None
         self.menu = QMenu(self.gui)
         self.menu.aboutToShow.connect(self.rebuild_menu)
         self.qaction.setMenu(self.menu)
         self.qaction.triggered.connect(self.show_status)
+
+    def initialization_complete(self):
+        self.db = self.gui.current_db.new_api
         if prefs['autostart']:
             self.start_server(quiet=True)
 

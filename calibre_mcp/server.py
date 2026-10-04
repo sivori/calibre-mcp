@@ -156,10 +156,14 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _send(self, status, body=None, content_type='application/json'):
         data = b'' if body is None else json.dumps(body, ensure_ascii=False).encode('utf-8')
+        if status >= 400:
+            self.close_connection = True
         self.send_response(status)
         if body is not None:
             self.send_header('Content-Type', content_type)
         self.send_header('Content-Length', str(len(data)))
+        if self.close_connection:
+            self.send_header('Connection', 'close')
         self.end_headers()
         if data:
             self.wfile.write(data)
@@ -179,17 +183,48 @@ class _Handler(BaseHTTPRequestHandler):
             return False
         return True
 
+    def _read_body(self):
+        # Some clients (Claude Code among them) send chunked bodies with no
+        # Content-Length; http.server doesn't decode those for us.
+        if 'chunked' in self.headers.get('Transfer-Encoding', '').lower():
+            chunks = []
+            while True:
+                size = int(self.rfile.readline().split(b';')[0].strip(), 16)
+                if size == 0:
+                    while self.rfile.readline() not in (b'\r\n', b'\n', b''):
+                        pass  # trailers
+                    return b''.join(chunks)
+                chunks.append(self.rfile.read(size))
+                self.rfile.readline()  # CRLF after each chunk
+        return self.rfile.read(int(self.headers.get('Content-Length') or 0))
+
     def do_POST(self):
+        # Always drain the body first: answering early on a keep-alive
+        # connection leaves the JSON to be parsed as the next request line.
+        try:
+            raw = self._read_body()
+        except ValueError:
+            self.close_connection = True
+            self._send(400, _error(None, PARSE_ERROR, 'Malformed request body'))
+            return
         if not self._check():
             return
         try:
-            length = int(self.headers.get('Content-Length') or 0)
-            msg = json.loads(self.rfile.read(length).decode('utf-8'))
+            msg = json.loads(raw.decode('utf-8'))
         except (ValueError, UnicodeDecodeError):
             self._send(400, _error(None, PARSE_ERROR, 'Body is not valid JSON'))
             return
         if isinstance(msg, list):
             self._send(400, _error(None, INVALID_REQUEST, 'Batches are not supported'))
+            return
+        # Clients on the per-request-metadata revisions (2026-07-28+) probe
+        # first and fall back to initialize on a plain 400.
+        meta = ((msg.get('params') or {}) if isinstance(msg, dict) else {}).get('_meta') or {}
+        version = meta.get('io.modelcontextprotocol/protocolVersion')
+        if version and version not in SUPPORTED_VERSIONS:
+            self._send(400, _error(msg.get('id'), INVALID_REQUEST,
+                                   f'Unsupported protocol version {version}; '
+                                   f'this server speaks {", ".join(SUPPORTED_VERSIONS)} via initialize'))
             return
         response = self.mcp.handle(msg)
         if response is None:

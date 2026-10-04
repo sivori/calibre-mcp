@@ -180,6 +180,35 @@ def test_http(db, ids):
         status, _ = rpc(url, 'ping', headers={'MCP-Protocol-Version': '1999-01-01'})
         check('unsupported protocol header is 400', status == 400, status)
 
+        status, _ = rpc(url, 'server/discover', {
+            '_meta': {'io.modelcontextprotocol/protocolVersion': '2026-07-28'}})
+        check('modern-era probe gets a plain 400', status == 400, status)
+
+        import http.client
+        conn = http.client.HTTPConnection('127.0.0.1', server.port)
+        body = json.dumps({'jsonrpc': '2.0', 'id': 7, 'method': 'ping'}).encode()
+        conn.putrequest('POST', '/mcp')
+        conn.putheader('Content-Type', 'application/json')
+        conn.putheader('Transfer-Encoding', 'chunked')
+        conn.endheaders()
+        conn.send(b'%x\r\n%s\r\n0\r\n\r\n' % (len(body), body))
+        resp = conn.getresponse()
+        check('chunked request body is read', resp.status == 200 and json.loads(resp.read())['id'] == 7, resp.status)
+        conn.close()
+
+        # Claude Code's probe: header-rejected request with a body, on a
+        # keep-alive connection. The reply must be our JSON 400, not
+        # http.server's HTML "Bad request syntax" from parsing the body.
+        conn = http.client.HTTPConnection('127.0.0.1', server.port)
+        body = json.dumps({'jsonrpc': '2.0', 'id': 'probe', 'method': 'server/discover', 'params': {
+            '_meta': {'io.modelcontextprotocol/protocolVersion': '2026-07-28'}}})
+        conn.request('POST', '/mcp', body, {
+            'Content-Type': 'application/json', 'MCP-Protocol-Version': '2026-07-28'})
+        resp = conn.getresponse()
+        raw = resp.read()
+        check('header-rejected probe answers in JSON', resp.status == 400 and raw.startswith(b'{'), raw[:80])
+        conn.close()
+
         status, _ = rpc(url.replace('/mcp', '/other'), 'ping')
         check('other paths 404', status == 404, status)
         try:
