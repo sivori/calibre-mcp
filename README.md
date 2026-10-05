@@ -38,14 +38,9 @@ Example prompts:
 
 ### 1. The calibre plugin
 
-Requires calibre 6 or later. Build the zip:
-
-```sh
-git clone https://github.com/sivori/calibre-mcp
-./calibre-mcp/build.sh
-```
-
-Then in calibre: **Preferences → Plugins → Load plugin from file**, choose
+Requires calibre 6 or later. Download `calibre-mcp-<version>.zip` from the
+[latest release](https://github.com/sivori/calibre-mcp/releases/latest) (or
+build it from a checkout with `./build.sh`). Then in calibre: **Preferences → Plugins → Load plugin from file**, choose
 the zip, and restart calibre. (Or install from the checkout with
 `calibre-customize -b calibre-mcp/calibre_mcp`. On macOS, `calibre-customize`
 and `calibre-debug` are in `/Applications/calibre.app/Contents/MacOS/`.)
