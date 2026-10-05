@@ -11,6 +11,8 @@ HTTP. Never touches a real library.
 import json
 import os
 import shutil
+import socket
+import subprocess
 import sys
 import tempfile
 import time
@@ -24,6 +26,10 @@ from calibre.library import db as open_db  # noqa: E402
 
 from calibre_mcp import tools  # noqa: E402
 from calibre_mcp.server import MCPServer  # noqa: E402
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BRIDGE = os.path.join(ROOT, 'mcp', 'bridge.py')
+TOOLS_JSON = os.path.join(ROOT, 'mcp', 'tools.json')
 
 TEXT = (
     'It was the best of times, it was the worst of times. The knight moved '
@@ -170,6 +176,13 @@ def test_http(db, ids):
         status, r = rpc(url, 'tools/list', headers={'MCP-Protocol-Version': '2025-06-18'})
         names = [t['name'] for t in r['result']['tools']]
         check('tools/list returns 7 tools', len(names) == 7, names)
+        check('every tool has a title', all(t.get('title') for t in r['result']['tools']))
+        with open(TOOLS_JSON, encoding='utf-8') as f:
+            exported = json.load(f)
+        check('mcp/tools.json matches tools/list (refresh: calibre-debug tests/run_tests.py -- --export-tools)',
+              exported == r['result']['tools'])
+
+        test_bridge(server.port)
 
         status, r = rpc(url, 'tools/call', {'name': 'search_books', 'arguments': {'query': 'chess'}})
         payload = json.loads(r['result']['content'][0]['text'])
@@ -233,7 +246,57 @@ def test_http(db, ids):
         server.stop()
 
 
+def bridge(port, *messages):
+    '''Runs mcp/bridge.py under the system python3, as the Claude plugin does.'''
+    lines = ''.join(json.dumps(m) + '\n' for m in messages)
+    out = subprocess.run(
+        ['python3', BRIDGE], input=lines, capture_output=True, text=True, timeout=60,
+        env={**os.environ, 'CALIBRE_MCP_PORT': str(port)})
+    return [json.loads(line) for line in out.stdout.splitlines()]
+
+
+def test_bridge(port):
+    init = {'jsonrpc': '2.0', 'id': 1, 'method': 'initialize',
+            'params': {'protocolVersion': '2025-06-18', 'capabilities': {}}}
+    probe = {'jsonrpc': '2.0', 'id': 0, 'method': 'server/discover',
+             'params': {'_meta': {'io.modelcontextprotocol/protocolVersion': '2026-07-28'}}}
+    note = {'jsonrpc': '2.0', 'method': 'notifications/initialized'}
+    tools_list = {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'}
+    call = {'jsonrpc': '2.0', 'id': 3, 'method': 'tools/call',
+            'params': {'name': 'search_books', 'arguments': {'query': 'chess'}}}
+
+    r = bridge(port, probe, init, note, tools_list, call)
+    check('bridge: one reply per request, none for notifications', [x['id'] for x in r] == [0, 1, 2, 3], r)
+    check('bridge: rejects the 2026-07-28 probe so clients fall back', 'error' in r[0], r[0])
+    check('bridge: initialize', r[1]['result']['protocolVersion'] == '2025-06-18', r[1])
+    check('bridge: tools/list forwarded', len(r[2]['result']['tools']) == 7, r[2])
+    payload = json.loads(r[3]['result']['content'][0]['text'])
+    check('bridge: tools/call forwarded', payload['total'] == 1, payload)
+
+    # Nothing listening: the server still starts and says what to do.
+    with socket.socket() as s:
+        s.bind(('127.0.0.1', 0))
+        dead = s.getsockname()[1]
+    r = bridge(dead, init, tools_list, call)
+    check('bridge offline: initialize still works', 'result' in r[0], r)
+    check('bridge offline: tools/list from tools.json', len(r[1]['result']['tools']) == 7, r[1])
+    check('bridge offline: tools/call says to open calibre',
+          r[2]['result']['isError'] and 'open calibre' in r[2]['result']['content'][0]['text'], r[2])
+
+
+def export_tools():
+    '''Writes mcp/tools.json, the bridge's tool list for when calibre is closed.'''
+    server = MCPServer(lambda: None, 0, log=lambda *a: None)
+    listing = server.handle({'jsonrpc': '2.0', 'id': 1, 'method': 'tools/list'})['result']['tools']
+    with open(TOOLS_JSON, 'w', encoding='utf-8') as f:
+        json.dump(listing, f, indent=2, ensure_ascii=False)
+        f.write('\n')
+    print(f'wrote {TOOLS_JSON}')
+
+
 def main():
+    if '--export-tools' in sys.argv:
+        return export_tools()
     root = tempfile.mkdtemp(prefix='calibre-mcp-test-')
     lib = os.path.join(root, 'library')
     os.mkdir(lib)

@@ -1,0 +1,15 @@
+{
+  "name": "sivori-calibre",
+  "description": "calibre-mcp: read your calibre ebook library from Claude.",
+  "owner": {
+    "name": "Chris Sivori",
+    "url": "https://github.com/sivori"
+  },
+  "plugins": [
+    {
+      "name": "calibre-mcp",
+      "source": "./",
+      "description": "Search, quote, and cite your calibre ebook library from Claude. Read-only."
+    }
+  ]
+}

@@ -212,12 +212,14 @@ def _limit(default, maximum):
 TOOLS = [
     {
         'name': 'library_info',
+        'title': 'Library overview',
         'description': 'Book count, whether full-text search is enabled and how much is indexed, and the annotation count.',
         'fn': library_info,
         'inputSchema': {'type': 'object', 'properties': {}},
     },
     {
         'name': 'search_books',
+        'title': 'Search books',
         'description': (
             'Search book metadata using calibre search syntax, e.g. "chess", '
             '"author:dickens", "tags:Fiction and pubdate:<1900", "series:true". '
@@ -234,6 +236,7 @@ TOOLS = [
     },
     {
         'name': 'get_book',
+        'title': 'Get book details',
         'description': 'Full metadata for one book: description, publisher, identifiers, languages, custom columns, annotation count.',
         'fn': get_book,
         'inputSchema': {
@@ -244,6 +247,7 @@ TOOLS = [
     },
     {
         'name': 'list_categories',
+        'title': 'List categories',
         'description': 'Tags, authors, series, publishers or languages in the library, with book counts, most-used first.',
         'fn': list_categories,
         'inputSchema': {
@@ -256,6 +260,7 @@ TOOLS = [
     },
     {
         'name': 'search_full_text',
+        'title': 'Search inside books',
         'description': (
             'Search inside the text of the books (calibre full-text search; '
             'SQLite FTS5 syntax: words, "exact phrases", AND/OR/NOT, prefix*). '
@@ -277,6 +282,7 @@ TOOLS = [
     },
     {
         'name': 'get_passage',
+        'title': 'Get passage',
         'description': 'A longer passage from one book around the first match for the query, for quoting or reading in context.',
         'fn': get_passage,
         'inputSchema': {
@@ -292,6 +298,7 @@ TOOLS = [
     },
     {
         'name': 'get_annotations',
+        'title': 'Get highlights and notes',
         'description': 'Highlights and notes made in the calibre viewer, optionally for one book and/or matching a text query.',
         'fn': get_annotations,
         'inputSchema': {

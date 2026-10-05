@@ -15,7 +15,7 @@ from .tools import TOOLS, TOOLS_BY_NAME, ToolError
 
 ENDPOINT = '/mcp'
 SUPPORTED_VERSIONS = ('2025-11-25', '2025-06-18', '2025-03-26')
-SERVER_INFO = {'name': 'calibre-mcp', 'version': '0.1.1'}
+SERVER_INFO = {'name': 'calibre-mcp', 'version': '0.2.0'}
 LOCAL_HOSTS = {'localhost', '127.0.0.1', '[::1]', '::1'}
 MAX_BODY = 1 << 20  # requests are small JSON-RPC calls
 
@@ -91,7 +91,7 @@ class MCPServer:
                 return _result(req_id, {})
             if method == 'tools/list':
                 return _result(req_id, {'tools': [
-                    {k: t[k] for k in ('name', 'description', 'inputSchema', 'annotations')}
+                    {k: t[k] for k in ('name', 'title', 'description', 'inputSchema', 'annotations')}
                     for t in TOOLS
                 ]})
             if method == 'tools/call':

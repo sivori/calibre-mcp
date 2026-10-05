@@ -1,0 +1,24 @@
+{
+  "name": "calibre-mcp",
+  "displayName": "Calibre Library",
+  "version": "0.2.0",
+  "description": "Search, quote, and cite your calibre ebook library: metadata, full text, passages, and your highlights. Read-only, and nothing leaves your computer except what Claude reads.",
+  "author": {
+    "name": "Chris Sivori",
+    "url": "https://github.com/sivori"
+  },
+  "homepage": "https://github.com/sivori/calibre-mcp",
+  "repository": "https://github.com/sivori/calibre-mcp",
+  "license": "GPL-3.0-only",
+  "keywords": ["calibre", "ebooks", "books", "reading", "library", "highlights", "research"],
+  "icon": "./art/icon-512.png",
+  "documentationUrl": "https://github.com/sivori/calibre-mcp#readme",
+  "supportUrl": "https://github.com/sivori/calibre-mcp/issues",
+  "privacyPolicyUrl": "https://github.com/sivori/calibre-mcp/blob/master/PRIVACY.md",
+  "mcpServers": {
+    "calibre": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/bridge.py"]
+    }
+  }
+}
