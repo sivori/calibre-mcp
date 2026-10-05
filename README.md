@@ -74,12 +74,37 @@ web or phone, which doesn't run local servers.
 If you changed the port in calibre, set `CALIBRE_MCP_PORT` in the
 environment Claude runs in.
 
-**Without the plugin**, any client that supports streamable HTTP servers
-can connect to the calibre side directly:
+**Without the plugin**, add the calibre server to Claude Code directly:
 
 ```sh
 claude mcp add --transport http calibre http://127.0.0.1:8395/mcp
 ```
+
+### Codex and other MCP clients
+
+The calibre side is a plain MCP server, so any client that runs local
+servers can use it. In the [Codex CLI](https://github.com/openai/codex):
+
+```sh
+codex mcp add calibre --url http://127.0.0.1:8395/mcp
+```
+
+That writes this to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.calibre]
+url = "http://127.0.0.1:8395/mcp"
+```
+
+For a client that only runs stdio servers, use the bridge from a checkout
+instead. It works the same way and starts even when calibre is closed:
+
+```sh
+codex mcp add calibre -- python3 /path/to/calibre-mcp/mcp/bridge.py
+```
+
+OpenAI's plugin directory only takes MCP servers at public HTTPS URLs, so
+calibre-mcp isn't listed there. Your library never leaves your machine.
 
 ## Settings
 
