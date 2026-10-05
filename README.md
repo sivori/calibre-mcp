@@ -66,11 +66,12 @@ Code:
 
 ```sh
 claude plugin marketplace add sivori/calibre-mcp
-claude plugin install calibre-mcp
+claude plugin install calibre-mcp@sivori-calibre
 ```
 
 The plugin runs `mcp/bridge.py` with your system `python3` (3.8 or later,
-standard library only, nothing to install). The bridge forwards Claude's
+standard library only, no packages to install; on macOS it comes with
+the Xcode Command Line Tools or Homebrew). The bridge forwards Claude's
 requests to calibre on `127.0.0.1`. If calibre is closed, the tools say so
 instead of failing silently. The plugin can't be used in claude.ai chat on the
 web or phone, which doesn't run local servers.
