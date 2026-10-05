@@ -16,6 +16,7 @@
 - [ ] Expose reading progress from the calibre viewer @idea
 
 ## Done
+- [x] 2026-10-05 v0.2.1: calibre toolbar icon is now SVG (text), clearing the directory's "image file the plugin's code could run" policy hold
 - [x] 2026-10-05 v0.2.0: Claude plugin bundle for the directory. Stdio bridge (mcp/bridge.py, offline tools.json fallback), calibre-library skill, PRIVACY.md, self-hosted marketplace.json, tool titles; bridge tested under system python3 and via `claude --plugin-dir`
 - [x] 2026-10-04 v0.1.1: security pass. Disabled template: searches (python: templates gave code execution via search_books), Host-header check, 1 MB request cap
 - [x] 2026-10-04 v0.1.0: seven read-only tools, stdlib streamable HTTP server, tests on a throwaway library, verified with Claude Code

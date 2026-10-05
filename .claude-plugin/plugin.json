@@ -1,7 +1,7 @@
 {
   "name": "calibre-mcp",
   "displayName": "Calibre Library",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Search, quote, and cite your calibre ebook library: metadata, full text, passages, and your highlights. Read-only, and nothing leaves your computer except what Claude reads.",
   "author": {
     "name": "Chris Sivori",

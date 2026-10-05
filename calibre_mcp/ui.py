@@ -20,7 +20,7 @@ class MCPAction(InterfaceAction):
         self.db = None
         # get_icons is injected into plugin modules by calibre; passing the
         # plugin name lets icon themes override it.
-        self.qaction.setIcon(get_icons('images/icon.png', 'Calibre MCP'))  # noqa: F821
+        self.qaction.setIcon(get_icons('images/icon.svg', 'Calibre MCP'))  # noqa: F821
         self.menu = QMenu(self.gui)
         self.menu.aboutToShow.connect(self.rebuild_menu)
         self.qaction.setMenu(self.menu)

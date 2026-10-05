@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f6f73"/>
+      <stop offset="1" stop-color="#1d4a4e"/>
+    </linearGradient>
+  </defs>
+  <!-- tile -->
+  <rect x="6" y="6" width="116" height="116" rx="26" fill="url(#bg)"/>
+  <!-- open book -->
+  <path d="M64 44 C52 36 36 34 22 36 L22 88 C36 86 52 88 64 96 Z" fill="#f6f1e4"/>
+  <path d="M64 44 C76 36 92 34 106 36 L106 88 C92 86 76 88 64 96 Z" fill="#e9e1cc"/>
+  <path d="M64 44 L64 96" stroke="#1d4a4e" stroke-width="2.5"/>
+  <!-- text lines -->
+  <g stroke="#9aa9a6" stroke-width="3" stroke-linecap="round">
+    <path d="M31 50 C40 49 48 50 55 53"/>
+    <path d="M31 60 C40 59 48 60 55 63"/>
+    <path d="M31 70 C40 69 48 70 55 73"/>
+  </g>
+  <!-- connector: highlighted line on the right page linking out to a node -->
+  <path d="M73 53 C80 50 88 49 96 50" stroke="#f0a43a" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M96 50 L96 24" stroke="#f0a43a" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="96" cy="21" r="9" fill="#f0a43a" stroke="#1d4a4e" stroke-width="3"/>
+  <g stroke="#9aa9a6" stroke-width="3" stroke-linecap="round">
+    <path d="M73 63 C80 60 88 59 97 60"/>
+    <path d="M73 73 C80 70 88 69 97 70"/>
+  </g>
+</svg>

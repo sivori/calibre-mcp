@@ -23,7 +23,7 @@ PORT = int(os.environ.get('CALIBRE_MCP_PORT') or 8395)
 URL = f'http://127.0.0.1:{PORT}/mcp'
 TIMEOUT = 60  # full-text searches over a large library can take a while
 SUPPORTED_VERSIONS = ('2025-11-25', '2025-06-18', '2025-03-26')
-SERVER_INFO = {'name': 'calibre', 'version': '0.2.0'}
+SERVER_INFO = {'name': 'calibre', 'version': '0.2.1'}
 INSTRUCTIONS = (
     "Read-only access to the user's calibre ebook library. Use search_books "
     'for metadata, search_full_text / get_passage for the text of the books, '
