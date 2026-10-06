@@ -7,7 +7,6 @@
 - [ ] Native support for the 2026-07-28 revision (stateless, per-request `_meta`, `server/discover`). Today modern clients fall back to `initialize`; a modern-only client would fail
 - [ ] Optional bearer token for clients that support headers, for machines shared with other users
 - [ ] `get_passage` can only return the first match; add an `occurrence` index, or a mode that returns every match in the book
-- [ ] Submit to the calibre plugin index (MobileRead forum thread + zip)
 
 ## Someday
 - [ ] Sortes Calibrianae: a `random_passage` tool (needs a way to read raw book text; FTS only returns snippets around matches) @idea
@@ -15,6 +14,7 @@
 - [ ] Expose reading progress from the calibre viewer @idea
 
 ## Done
+- [x] 2026-10-05 MobileRead plugin thread posted with the 0.2.1 zip: https://www.mobileread.com/forums/showthread.php?t=375607 (index listing is added by Kovid). On each release, replace the zip in the first post and add a version-history line
 - [x] 2026-10-05 GitHub release v0.2.1 with the calibre plugin zip; README points at releases/latest
 - [x] 2026-10-05 v0.2.1: calibre toolbar icon is now SVG (text), clearing the directory's "image file the plugin's code could run" policy hold
 - [x] 2026-10-05 v0.2.0: Claude plugin bundle for the directory. Stdio bridge (mcp/bridge.py, offline tools.json fallback), calibre-library skill, PRIVACY.md, self-hosted marketplace.json, tool titles; bridge tested under system python3 and via `claude --plugin-dir`
