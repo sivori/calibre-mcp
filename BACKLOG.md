@@ -1,5 +1,4 @@
 ## Now
-- [ ] Submit the Claude plugin to the directory at claude.ai/directory/manage (Plugin bundle, repo sivori/calibre-mcp, root path, branch master). Needs GitHub connected on claude.ai; expect a "known brand" reviewer hold on the calibre name
 
 ## Next
 - [ ] Windows: the bridge runs `python3`, which often isn't on PATH there (`py`/`python` are). Test on Windows, or document the workaround
@@ -14,6 +13,7 @@
 - [ ] Expose reading progress from the calibre viewer @idea
 
 ## Done
+- [x] 2026-10-05 Claude plugin submitted to the directory (claude.ai/directory/manage); awaiting review, possible "known brand" hold on the calibre name
 - [x] 2026-10-05 MobileRead plugin thread posted with the 0.2.1 zip: https://www.mobileread.com/forums/showthread.php?t=375607 (index listing is added by Kovid). On each release, replace the zip in the first post and add a version-history line
 - [x] 2026-10-05 GitHub release v0.2.1 with the calibre plugin zip; README points at releases/latest
 - [x] 2026-10-05 v0.2.1: calibre toolbar icon is now SVG (text), clearing the directory's "image file the plugin's code could run" policy hold
